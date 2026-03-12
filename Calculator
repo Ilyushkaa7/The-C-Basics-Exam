@@ -1,0 +1,129 @@
+#include <iostream>
+using namespace std;
+
+const int MAXIMUM = 200;
+
+int prioritetOperatora(char operatorSimvol)
+{
+    if (operatorSimvol == '+' || operatorSimvol == '-') return 1;
+    if (operatorSimvol == '*' || operatorSimvol == '/') return 2;
+    return 0;
+}
+
+int vichislenie(int chisloA, int chisloB, char operatorSimvol)
+{
+    if (operatorSimvol == '+') return chisloA + chisloB;
+    if (operatorSimvol == '-') return chisloA - chisloB;
+    if (operatorSimvol == '*') return chisloA * chisloB;
+    if (operatorSimvol == '/') return chisloA / chisloB;
+    return 0;
+}
+
+int reshitPrimer(char stroka[])
+{
+    int chisla[MAXIMUM], kolvoChisel = 0;
+    char operatory[MAXIMUM];
+    int kolvoOperatorov = 0;
+    int index = 0;
+
+    while (stroka[index])
+    {
+        if (stroka[index] == '-' && (index == 0 ||
+            stroka[index - 1] == '(' ||
+            stroka[index - 1] == '+' ||
+            stroka[index - 1] == '-' ||
+            stroka[index - 1] == '*' ||
+            stroka[index - 1] == '/'))
+        {
+            index++;
+            int znachenie = 0;
+            while (stroka[index] >= '0' && stroka[index] <= '9')
+            {
+                znachenie = znachenie * 10 + (stroka[index] - '0');
+                index++;
+            }
+            chisla[kolvoChisel++] = -znachenie;
+            continue;
+        }
+
+        if (stroka[index] >= '0' && stroka[index] <= '9')
+        {
+            int znachenie = 0;
+            while (stroka[index] >= '0' && stroka[index] <= '9')
+            {
+                znachenie = znachenie * 10 + (stroka[index] - '0');
+                index++;
+            }
+            chisla[kolvoChisel++] = znachenie;
+            continue;
+        }
+
+        if (stroka[index] == '(')
+        {
+            operatory[kolvoOperatorov++] = stroka[index];
+            index++;
+            continue;
+        }
+
+        if (stroka[index] == ')')
+        {
+            while (kolvoOperatorov > 0 && operatory[kolvoOperatorov - 1] != '(')
+            {
+                int b = chisla[--kolvoChisel];
+                int a = chisla[--kolvoChisel];
+                char oper = operatory[--kolvoOperatorov];
+                chisla[kolvoChisel++] = vichislenie(a, b, oper);
+            }
+            kolvoOperatorov--;
+            index++;
+            continue;
+        }
+
+        if (stroka[index] == '+' || stroka[index] == '-' ||
+            stroka[index] == '*' || stroka[index] == '/')
+        {
+            while (kolvoOperatorov > 0 &&
+                operatory[kolvoOperatorov - 1] != '(' &&
+                prioritetOperatora(operatory[kolvoOperatorov - 1]) >=
+                prioritetOperatora(stroka[index]))
+            {
+                int b = chisla[--kolvoChisel];
+                int a = chisla[--kolvoChisel];
+                char oper = operatory[--kolvoOperatorov];
+                chisla[kolvoChisel++] = vichislenie(a, b, oper);
+            }
+            operatory[kolvoOperatorov++] = stroka[index];
+            index++;
+        }
+    }
+
+    while (kolvoOperatorov > 0)
+    {
+        int b = chisla[--kolvoChisel];
+        int a = chisla[--kolvoChisel];
+        char oper = operatory[--kolvoOperatorov];
+        chisla[kolvoChisel++] = vichislenie(a, b, oper);
+    }
+
+    return chisla[0];
+}
+
+int main()
+{
+    char strokaVvoda[MAXIMUM];
+    int vybor;
+
+    while (true)
+    {
+        cout << "\n1 - Dlya Resheniya | 0 - Dlya vixoda\n";
+        cin >> vybor;
+
+        if (vybor == 0) break;
+
+        cout << "Primer: ";
+        cin >> strokaVvoda;
+
+        cout << "Resultat: " << reshitPrimer(strokaVvoda) << "\n";
+    }
+    return 0;
+}
