@@ -1,0 +1,161 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <iostream>
+#include <cstring>
+using namespace std;
+
+const int MAXIMUM = 100;
+
+char nazvanie[MAXIMUM][50];
+char opisanie[MAXIMUM][200];
+int prioritet[MAXIMUM];
+int den[MAXIMUM], mesyac[MAXIMUM], god[MAXIMUM];
+int chas[MAXIMUM], minuta[MAXIMUM];
+int kolichestvo = 0;
+
+void dobavitZadachu()
+{
+    cout << "Imya: "; cin >> nazvanie[kolichestvo];
+    cout << "Prioritet: "; cin >> prioritet[kolichestvo];
+    cout << "Opisanie: "; cin >> opisanie[kolichestvo];
+    cout << "Data (d m y): "; cin >> den[kolichestvo] >> mesyac[kolichestvo] >> god[kolichestvo];
+    cout << "Vremya (h m): "; cin >> chas[kolichestvo] >> minuta[kolichestvo];
+    kolichestvo++;
+}
+
+void udalitZadachu()
+{
+    int id; cin >> id;
+    if (id < 0 || id >= kolichestvo) return;
+    for (int i = id; i < kolichestvo - 1; i++)
+    {
+        strcpy(nazvanie[i], nazvanie[i + 1]);
+        strcpy(opisanie[i], opisanie[i + 1]);
+        prioritet[i] = prioritet[i + 1];
+        den[i] = den[i + 1]; mesyac[i] = mesyac[i + 1]; god[i] = god[i + 1];
+        chas[i] = chas[i + 1]; minuta[i] = minuta[i + 1];
+    }
+    kolichestvo--;
+}
+
+void izmenitZadachu()
+{
+    int id; cin >> id;
+    if (id < 0 || id >= kolichestvo) return;
+    cout << "Imya: "; cin >> nazvanie[id];
+    cout << "Prioritet: "; cin >> prioritet[id];
+    cout << "Opisanie: "; cin >> opisanie[id];
+    cout << "Data: "; cin >> den[id] >> mesyac[id] >> god[id];
+    cout << "Vremya: "; cin >> chas[id] >> minuta[id];
+}
+
+void poiskZadach()
+{
+    cout << "Poisk: 1-Imya 2-prioritet 3-Opisanie 4-data 5-Vremya: ";
+    int tip; cin >> tip;
+
+    if (tip == 1)
+    {
+        char zapros[50]; cin >> zapros;
+        for (int i = 0; i < kolichestvo; i++) if (strstr(nazvanie[i], zapros))
+            cout << i << ": " << nazvanie[i] << "\n";
+    }
+    else if (tip == 2)
+    {
+        int p; cin >> p;
+        for (int i = 0; i < kolichestvo; i++) if (prioritet[i] == p)
+            cout << i << ": " << nazvanie[i] << "\n";
+    }
+    else if (tip == 3)
+    {
+        char zapros[200]; cin >> zapros;
+        for (int i = 0; i < kolichestvo; i++) if (strstr(opisanie[i], zapros))
+            cout << i << ": " << nazvanie[i] << "\n";
+    }
+    else if (tip == 4)
+    {
+        int d, m, g; cin >> d >> m >> g;
+        for (int i = 0; i < kolichestvo; i++) if (den[i] == d && mesyac[i] == m && god[i] == g)
+            cout << i << ": " << nazvanie[i] << "\n";
+    }
+    else if (tip == 5)
+    {
+        int ch, min; cin >> ch >> min;
+        for (int i = 0; i < kolichestvo; i++) if (chas[i] == ch && minuta[i] == min)
+            cout << i << ": " << nazvanie[i] << "\n";
+    }
+}
+
+void sortirovkaPoPrioritetu()
+{
+    for (int i = 0; i < kolichestvo - 1; i++)
+        for (int j = 0; j < kolichestvo - i - 1; j++)
+            if (prioritet[j] < prioritet[j + 1])
+            {
+                swap(nazvanie[j], nazvanie[j + 1]);
+                swap(opisanie[j], opisanie[j + 1]);
+                swap(prioritet[j], prioritet[j + 1]);
+                swap(den[j], den[j + 1]);
+                swap(mesyac[j], mesyac[j + 1]);
+                swap(god[j], god[j + 1]);
+                swap(chas[j], chas[j + 1]);
+                swap(minuta[j], minuta[j + 1]);
+            }
+}
+
+void sortirovkaPoDate()
+{
+    for (int i = 0; i < kolichestvo - 1; i++)
+        for (int j = 0; j < kolichestvo - i - 1; j++)
+        {
+            int data1 = god[j] * 10000 + mesyac[j] * 100 + den[j];
+            int data2 = god[j + 1] * 10000 + mesyac[j + 1] * 100 + den[j + 1];
+            if (data1 > data2)
+            {
+                swap(nazvanie[j], nazvanie[j + 1]);
+                swap(opisanie[j], opisanie[j + 1]);
+                swap(prioritet[j], prioritet[j + 1]);
+                swap(den[j], den[j + 1]);
+                swap(mesyac[j], mesyac[j + 1]);
+                swap(god[j], god[j + 1]);
+                swap(chas[j], chas[j + 1]);
+                swap(minuta[j], minuta[j + 1]);
+            }
+        }
+}
+
+void pokazatPoPeriodu()
+{
+    int d, m, g, tip, tipSort;
+    cout << "Date (d m y): "; cin >> d >> m >> g;
+    cout << "Period (1-den 2-nedelya 3-mesyac): "; cin >> tip;
+    cout << "Sort (1-prioritet 2-data): "; cin >> tipSort;
+
+    if (tipSort == 1) sortirovkaPoPrioritetu();
+    else sortirovkaPoDate();
+
+    for (int i = 0; i < kolichestvo; i++)
+    {
+        int pokazat = 0;
+        if (tip == 1 && den[i] == d && mesyac[i] == m && god[i] == g) pokazat = 1;
+        if (tip == 2 && god[i] == g && mesyac[i] == m && den[i] >= d && den[i] <= d + 6) pokazat = 1;
+        if (tip == 3 && mesyac[i] == m && god[i] == g) pokazat = 1;
+
+        if (pokazat) cout << nazvanie[i] << " (prioritet " << prioritet[i] << ")\n";
+    }
+}
+
+int main()
+{
+    int komanda;
+    while (true)
+    {
+        cout << "\n1-Dobavit 2-Ydalit 3-Redaktirovat 4-Poisk 5-Pokazat 0-Vixod: ";
+        cin >> komanda;
+        if (komanda == 0) break;
+        if (komanda == 1) dobavitZadachu();
+        if (komanda == 2) udalitZadachu();
+        if (komanda == 3) izmenitZadachu();
+        if (komanda == 4) poiskZadach();
+        if (komanda == 5) pokazatPoPeriodu();
+    }
+}
